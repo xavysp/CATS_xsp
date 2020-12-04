@@ -5,14 +5,14 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-def bdrloss(prediction, label, radius):
+def bdrloss(prediction, label, radius,device='cpu'):
     '''
     The boundary tracing loss that handles the confusing pixels.
     '''
 
     filt = torch.ones(1, 1, 2*radius+1, 2*radius+1)
     filt.requires_grad = False
-    filt = filt.cuda()
+    filt = filt.to(device)
 
     bdr_pred = prediction * label
     pred_bdr_sum = label * F.conv2d(bdr_pred, filt, bias=None, stride=1, padding=radius)
@@ -32,16 +32,16 @@ def bdrloss(prediction, label, radius):
 
 
 
-def textureloss(prediction, label, mask_radius):
+def textureloss(prediction, label, mask_radius, device='cpu'):
     '''
     The texture suppression loss that smooths the texture regions.
     '''
     filt1 = torch.ones(1, 1, 3, 3)
     filt1.requires_grad = False
-    filt1 = filt1.cuda()
+    filt1 = filt1.to(device)
     filt2 = torch.ones(1, 1, 2*mask_radius+1, 2*mask_radius+1)
     filt2.requires_grad = False
-    filt2 = filt2.cuda()
+    filt2 = filt2.to(device)
 
     pred_sums = F.conv2d(prediction.float(), filt1, bias=None, stride=1, padding=1)
     label_sums = F.conv2d(label.float(), filt2, bias=None, stride=1, padding=mask_radius)
@@ -54,7 +54,7 @@ def textureloss(prediction, label, mask_radius):
     return torch.sum(loss)
 
 
-def tracingloss(prediction, label, tex_factor=0., bdr_factor=0., balanced_w=1.1):
+def tracingloss(prediction, label, tex_factor=0., bdr_factor=0., balanced_w=1.1, device='cpu'):
     label = label.float()
     prediction = prediction.float()
     with torch.no_grad():
@@ -72,7 +72,7 @@ def tracingloss(prediction, label, tex_factor=0., bdr_factor=0., balanced_w=1.1)
                 prediction.float(),label.float(), weight=mask, reduce=False))
     label_w = (label != 0).float()
     #print('tex')
-    textcost = textureloss(prediction.float(),label_w.float(), mask_radius=4)
-    bdrcost = bdrloss(prediction.float(),label_w.float(),radius=4)
+    textcost = textureloss(prediction.float(),label_w.float(), mask_radius=4, device=device)
+    bdrcost = bdrloss(prediction.float(),label_w.float(),radius=4, device=device)
 
     return cost + bdr_factor*bdrcost + tex_factor*textcost

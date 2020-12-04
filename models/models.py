@@ -74,10 +74,10 @@ class Network(nn.Module):
         self.score_dsn4 = nn.Conv2d(21, 1, 1)
         self.score_dsn5 = nn.Conv2d(21, 1, 1)
 
-        self.weight_deconv2 =  make_bilinear_weights(4, 1).cuda()
-        self.weight_deconv3 =  make_bilinear_weights(8, 1).cuda()
-        self.weight_deconv4 =  make_bilinear_weights(16, 1).cuda()
-        self.weight_deconv5 =  make_bilinear_weights(16, 1).cuda()
+        self.weight_deconv2 =  make_bilinear_weights(4, 1)#.cuda()
+        self.weight_deconv3 =  make_bilinear_weights(8, 1)#.cuda()
+        self.weight_deconv4 =  make_bilinear_weights(16, 1)#.cuda()
+        self.weight_deconv5 =  make_bilinear_weights(16, 1)#.cuda()
 
 
         self.attention = CoFusion(5, 5)
