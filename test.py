@@ -10,14 +10,14 @@ import numpy as np
 from tqdm import tqdm
 import cv2
 
-def test(cfg, model, test_loader, save_dir):
+def test(cfg, model, test_loader, save_dir,device='cpu'):
     model.eval()
     dl = tqdm(test_loader)
     if not isdir(save_dir):
         os.makedirs(save_dir)
     for image, pth in dl:
         dl.set_description("Single-scale test")
-        image = image.cuda()
+        image = image.to(device)
         _, _, H, W = image.shape
         filename = pth[0]
         results = model(image)

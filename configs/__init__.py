@@ -5,14 +5,14 @@ from os.path import join
 import torch
 
 class Config(object):
-    def __init__(self):
-        self.data = "bsds"
+    def __init__(self, train_data="bsds"):
+        self.data = train_data.lower()
         # ============== training
         self.resume = "./pretrained/{}.pth".format(self.data)
         self.msg_iter = 500
         self.gpu = '0' if torch.cuda.device_count() != 0 else None
         self.save_pth = join("./output", self.data)
-        self.pretrained = "data/vgg16.pth"
+        self.pretrained = "pretrained/vgg16.pth"
         self.aug = False
 
         # ============== testing

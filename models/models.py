@@ -12,9 +12,10 @@ from .cofusion import CoFusion
 
 
 class Network(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg, devi='cpu'):
         super(Network, self).__init__()
         self.cfg = cfg
+        self.devi=devi
 
         self.conv1_1 = nn.Conv2d(3, 64, 3, padding=1)
         self.conv1_2 = nn.Conv2d(64, 64, 3, padding=1)
@@ -74,10 +75,10 @@ class Network(nn.Module):
         self.score_dsn4 = nn.Conv2d(21, 1, 1)
         self.score_dsn5 = nn.Conv2d(21, 1, 1)
 
-        self.weight_deconv2 =  make_bilinear_weights(4, 1)#.cuda()
-        self.weight_deconv3 =  make_bilinear_weights(8, 1)#.cuda()
-        self.weight_deconv4 =  make_bilinear_weights(16, 1)#.cuda()
-        self.weight_deconv5 =  make_bilinear_weights(16, 1)#.cuda()
+        self.weight_deconv2 =  make_bilinear_weights(4, 1).to(self.devi)
+        self.weight_deconv3 =  make_bilinear_weights(8, 1).to(self.devi)
+        self.weight_deconv4 =  make_bilinear_weights(16, 1).to(self.devi)
+        self.weight_deconv5 =  make_bilinear_weights(16, 1).to(self.devi)
 
 
         self.attention = CoFusion(5, 5)
@@ -165,7 +166,7 @@ class Network(nn.Module):
 
         ## transpose and crop way
 
-
+        # print(so2_out.shape, self.weight_deconv2.shape)
         upsample2 = torch.nn.functional.conv_transpose2d(so2_out, self.weight_deconv2, stride=2)
         upsample3 = torch.nn.functional.conv_transpose2d(so3_out, self.weight_deconv3, stride=4)
         upsample4 = torch.nn.functional.conv_transpose2d(so4_out, self.weight_deconv4, stride=8)

@@ -61,8 +61,8 @@ def dataset_info(dataset_name, is_linux=True):
             'BIPED': {
                 'img_height': 720,
                 'img_width': 1280,
-                'test_list': 'test_rgb.txt',
-                'train_list': 'train_rgb.txt',
+                'test_list': 'test_pair.txt',
+                'train_list': 'train_pair.txt',
                 'data_dir': '/opt/dataset/BIPED',  # mean_rgb
                 'yita': 0.5
             },
@@ -191,6 +191,15 @@ class MyDataLoader(data.Dataset):
 
             label = Image.open(join(self.root, lb_file))
             img = Image.open(join(self.root, img_file))
+            # for BIPED
+            tmp_size = label.size
+            if tmp_size[0] < 400 or tmp_size[1] < 400:
+                label = label.resize(400, 400)
+                img = img.resize(400, 400)
+            else:
+                label = label.crop((0, 0, 400, 400))
+                img = img.crop((0, 0, 400, 400))
+            # end for BIPED
 
             if self.transform:
                 im_lb = dict(im = img, lb = label)
@@ -213,7 +222,7 @@ class MyDataLoader(data.Dataset):
 
             return img, label, basename(img_file).split('.')[0]
         else:
-            img_file = self.filelist[index] if self.data_name.lower()=='biped' else self.filelist[index].rstrip()
+            img_file = self.filelist[index][0] if self.data_name.lower()=='biped' else self.filelist[index].rstrip()
             img = np.array(Image.open(join(self.root, img_file)), dtype=np.float32)
             img = prepare_image_PIL(img)
             return img, basename(img_file).split('.')[0]

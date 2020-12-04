@@ -60,7 +60,7 @@ parser.add_argument('--test_data', default = TEST_DATA, type = str, help = "Sett
 
 args = parser.parse_args()
 
-cfg = Config()
+cfg = Config(train_data = TRAIN_DATA)
 
 if cfg.gpu:
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -76,7 +76,7 @@ def main():
     # model
     device = torch.device('cpu' if torch.cuda.device_count() == 0
                           else 'cuda')
-    model = Network(cfg).to(device) # enabled for GPU or CPU usage
+    model = Network(cfg, devi=device).to(device) # enabled for GPU or CPU usage
     print('=> Load model')
 
 
@@ -122,12 +122,14 @@ def main():
 
         for epoch in range(0, cfg.max_epoch):
 
+
             tr_avg_loss, tr_detail_loss = train(
                 cfg,train_loader, model, optim, scheduler, epoch,
                 save_dir = join(TMP_DIR, "train", "epoch-%d-training-record" % epoch),
                 device=device)
 
-            test(cfg, model, test_loader, save_dir = join(TMP_DIR, "train", "epoch-%d-testing-record-view" % epoch))
+            test(cfg, model, test_loader, save_dir=join(TMP_DIR, "train", "epoch-%d-testing-record-view" % epoch),
+                 device=device)
 
             log.flush()
 
