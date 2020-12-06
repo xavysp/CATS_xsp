@@ -167,9 +167,12 @@ class MyDataLoader(data.Dataset):
 
         else:
             with open(self.filelist, 'r') as f:
-                self.filelist = f.readlines()
+                files = f.readlines()
 
-        # self.filelist = [line.strip() for line in filelist]
+            files = [line.strip() for line in files]
+            files = [line.split() for line in files]
+            self.filelist = [line[0] for line in files]
+            # pairs = [line.split() for line in files]
 
         # pre-processing
         if self.transform:

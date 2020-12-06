@@ -41,7 +41,7 @@ TRAIN_DATA = DATASET_NAMES[0]  # BIPED=0
 train_info = dataset_info(TRAIN_DATA, is_linux=IS_LINUX)
 train_dir = train_info['data_dir']
 # ----------- test -----------
-TEST_DATA = DATASET_NAMES[0]  # max 8
+TEST_DATA = DATASET_NAMES[3]  # max 8
 test_info = dataset_info(TEST_DATA, is_linux=IS_LINUX)
 test_dir = test_info['data_dir']
 is_testing = True
@@ -49,8 +49,9 @@ base_dir = "../../dataset" if not IS_LINUX else "/opt/dataset"
 base_dir = join(base_dir,TRAIN_DATA)
 
 parser = argparse.ArgumentParser(description='Mode Selection')
-parser.add_argument('--mode', default = 'train', type = str, choices={"train", "test"}, help = "Setting models for training or testing")
+parser.add_argument('--mode', default = 'test', type = str, choices={"train", "test"}, help = "Setting models for training or testing")
 parser.add_argument('--base_dir', default = base_dir , type = str, help = "Setting models for training or testing")
+parser.add_argument('--checkpoint', default = 'epoch-4' , type = str, help = "Setting models for training or testing")
 parser.add_argument('--train_dir', default = train_dir , type = str, help = "Setting models for training or testing")
 parser.add_argument('--train_list', default = train_info["train_list"] , type = str, help = "Setting models for training or testing")
 parser.add_argument('--train_data', default = TRAIN_DATA , type = str, help = "Setting models for training or testing")
@@ -60,7 +61,7 @@ parser.add_argument('--test_data', default = TEST_DATA, type = str, help = "Sett
 
 args = parser.parse_args()
 
-cfg = Config(train_data = TRAIN_DATA)
+cfg = Config(train_data = TRAIN_DATA,chkpnt=args.checkpoint)
 
 if cfg.gpu:
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -89,9 +90,10 @@ def main():
 
     if args.mode == "test":
         assert isfile(cfg.resume), "No checkpoint is found at '{}'".format(cfg.resume)
-
-        model.load_checkpoint()
-        test(cfg, model, test_loader, save_dir = join(TMP_DIR, "test", "sing_scale_test"))
+        checkpoints =torch.load(cfg.resume, map_location=device)
+        model.load_state_dict(checkpoints['state_dict'])
+        # model.load_state_dict(torch.load(cfg.resume, map_location=device))
+        test(cfg, model, test_loader, save_dir = join(TMP_DIR, "test", "sing_scl_"+args.test_data))
 
         if cfg.multi_aug:
             multiscale_test(model, test_loader, save_dir = join(TMP_DIR, "test", "multi_scale_test"))
@@ -105,7 +107,7 @@ def main():
 
         model.init_weight()
 
-        if cfg.resume:
+        if cfg.resume and args.mode=='test':
             model.load_checkpoint()
 
         model.train()

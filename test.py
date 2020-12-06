@@ -12,6 +12,7 @@ import cv2
 
 def test(cfg, model, test_loader, save_dir,device='cpu'):
     model.eval()
+    print("Saving in:", save_dir)
     dl = tqdm(test_loader)
     if not isdir(save_dir):
         os.makedirs(save_dir)

@@ -5,10 +5,10 @@ from os.path import join
 import torch
 
 class Config(object):
-    def __init__(self, train_data="bsds"):
+    def __init__(self, train_data="bsds", chkpnt='epoch-10'):
         self.data = train_data.lower()
         # ============== training
-        self.resume = "./pretrained/{}.pth".format(self.data)
+        self.resume = "pretrained/{}.pth".format(chkpnt)
         self.msg_iter = 500
         self.gpu = '0' if torch.cuda.device_count() != 0 else None
         self.save_pth = join("./output", self.data)
