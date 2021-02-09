@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 from torch.utils import data
+import torch
 import os, json
 from os.path import join, basename
 from PIL import Image, ImageFile
@@ -66,19 +67,20 @@ def dataset_info(dataset_name, is_linux=True):
                 'data_dir': '/opt/dataset/BIPED',  # mean_rgb
                 'yita': 0.5
             },
-            'CLASSIC': {
-                'img_height': 512,
-                'img_width': 512,
-                'test_list': None,
-                'data_dir': 'data',  # mean_rgb
-                'yita': 0.5
-            },
+
             'DCD': {
                 'img_height': 240,
                 'img_width': 360,
                 'test_list': 'test_pair.lst',
                 'data_dir': '/opt/dataset/DCD',  # mean_rgb
                 'yita': 0.2
+            },
+            'CLASSIC': {
+                'img_height': 512,
+                'img_width': 512,
+                'test_list': None,
+                'data_dir': 'classic',  # mean_rgb
+                'yita': 0.5
             }
         }
     else:
@@ -225,7 +227,91 @@ class MyDataLoader(data.Dataset):
 
             return img, label, basename(img_file).split('.')[0]
         else:
-            img_file = self.filelist[index][0] if self.data_name.lower()=='biped' else self.filelist[index].rstrip()
+            if self.data_name.lower() == 'biped':
+                img_file = self.filelist[index][0]
+            else:
+                # img_file = self.filelist[index].rstrip()
+                img_file = self.filelist[index].rstrip().split()[0]
+
             img = np.array(Image.open(join(self.root, img_file)), dtype=np.float32)
             img = prepare_image_PIL(img)
             return img, basename(img_file).split('.')[0]
+
+class Data_test(data.Dataset):
+
+	def __init__(self, root, yita=0.5,
+		mean_bgr = np.array([104.00699, 116.66877, 122.67892],),
+		rgb=False, scale=None,args=None):
+		self.mean_bgr = mean_bgr
+		self.dataset_name = args.test_data
+		self.root = root
+		self.lst = args.test_list
+		self.yita = yita
+		self.rgb = rgb
+		self.scale = scale
+		self.cache = {}
+		self.images_name = []
+		self.img_shape = []
+		# self.files = np.loadtxt(lst_dir, dtype=str)
+		if self.lst is not None:
+			lst_dir = os.path.join(self.root, self.lst)
+			with open(lst_dir, 'r') as f:
+				self.files = f.readlines()
+				self.files = [line.strip().split(' ') for line in self.files]
+
+			for i in range(len(self.files)):
+				folder, filename = os.path.split(self.files[i][0])
+				name, ext = os.path.splitext(filename)
+				self.images_name.append(name)
+				self.img_shape.append(None)
+		else:
+			images_path = os.listdir(self.root)
+			labels_path = [None for i in images_path]
+			self.files = [images_path, labels_path]
+			for i in range(len(self.files[0])):
+				folder, filename = os.path.split(self.files[0][i])
+				name, ext = os.path.splitext(filename)
+				tmp_img = cv2.imread(os.path.join(self.root,self.files[0][i]))
+				tmp_shape = tmp_img.shape
+				self.images_name.append(name)
+				self.img_shape.append(tmp_shape)
+
+
+	def __len__(self):
+		lenght_data = len(self.files) if self.dataset_name !='CLASSIC' else len(self.files[0])
+		return lenght_data
+
+	def __getitem__(self, index):
+		data_file = self.files[index]
+		# load Image
+		if self.dataset_name.lower() =='biped':
+			base_im_dir = self.root+'imgs/test/'
+			img_file = base_im_dir  + data_file[0]
+		else:
+			img_file = os.path.join(self.root,data_file[0])
+		# print(img_file)
+		if not os.path.exists(img_file):
+			img_file = img_file.replace('jpg', 'png')
+		# img = Image.open(img_file)
+		# img = load_image_with_cache(img_file, self.cache)
+		img = cv2.imread(img_file)
+		# load gt image
+		if self.dataset_name.lower() =='biped':
+			base_gt_dir = self.root+'edge_maps/test/'
+
+		gt=None
+		return self.transform(img, gt)
+
+	def transform(self, img, gt):
+		img = np.array(img, dtype=np.float32)
+		if self.rgb:
+			img = img[:, :, ::-1] # RGB->BGR
+		img -= self.mean_bgr
+
+		if gt is None:
+			img = cv2.resize(img,dsize=(1504,1504)) # just for Robert dataset 1504
+			gt = np.zeros((img.shape[:2]))
+			gt = torch.from_numpy(np.array([gt])).float()
+		img = img.transpose((2, 0, 1))
+		# img = torch.from_numpy(img.copy()).float()
+		return img, gt

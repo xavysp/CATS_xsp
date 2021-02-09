@@ -16,11 +16,13 @@ def test(cfg, model, test_loader, save_dir,device='cpu'):
     dl = tqdm(test_loader)
     if not isdir(save_dir):
         os.makedirs(save_dir)
-    for image, pth in dl:
+    for i,(image, pth) in enumerate(dl):
         dl.set_description("Single-scale test")
+        # images = sample_batched['images'].to(device)
         image = image.to(device)
         _, _, H, W = image.shape
-        filename = pth[0]
+        filename = test_loader.dataset.images_name[i]
+        img_shape = test_loader.dataset.img_shape[i]
         results = model(image)
         if cfg.side_edge:
             results_all = torch.zeros((len(results), 1, H, W))
@@ -30,8 +32,9 @@ def test(cfg, model, test_loader, save_dir,device='cpu'):
 
         result = torch.squeeze(results[-1].detach()).cpu().numpy()
         result = Image.fromarray(((1 - result) * 255).astype(np.uint8))
+        if img_shape is not None:
+            result= result.resize((img_shape[1],img_shape[0]))
         result.save(join(save_dir, "%s.png" % filename))
-
 
 
 def multiscale_test(model, test_loader, save_dir):
