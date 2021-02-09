@@ -5,7 +5,7 @@ from os.path import join
 import torch
 
 class Config(object):
-    def __init__(self, train_data="bsds", chkpnt='epoch-10'):
+    def __init__(self, train_data="bsds", chkpnt='biped-20'):
         self.data = train_data.lower()
         # ============== training
         self.resume = "pretrained/{}.pth".format(chkpnt)
