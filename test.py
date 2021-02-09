@@ -36,6 +36,8 @@ def test(cfg, model, test_loader, save_dir,device='cpu'):
             result= result.resize((img_shape[1],img_shape[0]))
         result.save(join(save_dir, "%s.png" % filename))
 
+    print('prediction edge-map saved in:',save_dir )
+
 
 def multiscale_test(model, test_loader, save_dir):
     model.eval()
