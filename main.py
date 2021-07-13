@@ -36,17 +36,17 @@ DATASET_NAMES = [
     'CLASSIC'
 ]
 # ----------- test -----------
-TEST_DATA = DATASET_NAMES[-1]  # max 8
+TEST_DATA = DATASET_NAMES[1]  # max 8
 test_info = dataset_info(TEST_DATA, is_linux=IS_LINUX)
 test_dir = test_info['data_dir']
 is_testing = True
 
 # Training settings
-TRAIN_DATA = DATASET_NAMES[0]  # BIPED=0
+TRAIN_DATA = DATASET_NAMES[1]  # BIPED=0
 train_info = dataset_info(TRAIN_DATA, is_linux=IS_LINUX)
 train_dir = train_info['data_dir']
 
-base_dir = "../../dataset" if not IS_LINUX else "/opt/dataset"
+base_dir = "C:/Users/xavysp/dataset" if not IS_LINUX else "/opt/dataset"
 base_dir = join(base_dir,TRAIN_DATA)
 
 parser = argparse.ArgumentParser(description='Mode Selection')
@@ -58,10 +58,12 @@ parser.add_argument('--train_data', default = TRAIN_DATA , type = str, help = "S
 parser.add_argument('--test_dir', default = test_dir , type = str, help = "Setting models for training or testing")
 parser.add_argument('--test_list', default = test_info["test_list"] , type = str, help = "Setting models for training or testing")
 parser.add_argument('--test_data', default = TEST_DATA, type = str, help = "Setting models for training or testing")
+parser.add_argument('--chkpt_name', default = 'bsds.pth' , type = str, help = "Setting models for training or testing")
+
 
 args = parser.parse_args()
 
-cfg = Config(train_data = TRAIN_DATA)
+cfg = Config(train_data = TRAIN_DATA,chkpnt=args.chkpt_name)
 
 if cfg.gpu:
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"

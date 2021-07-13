@@ -3,12 +3,14 @@
 
 from os.path import join
 import torch
+from os.path import join
 
 class Config(object):
     def __init__(self, train_data="bsds", chkpnt='biped-20'):
         self.data = train_data.lower()
         # ============== training
-        self.resume = "pretrained/{}.pth".format(chkpnt)
+
+        self.resume = join('pretrained',train_data,chkpnt)
         self.msg_iter = 500
         self.gpu = '0' if torch.cuda.device_count() != 0 else None
         self.save_pth = join("./output", self.data)

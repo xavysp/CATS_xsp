@@ -104,7 +104,8 @@ class Network(nn.Module):
     def load_checkpoint(self):
         if isfile(self.cfg.resume):
             print("=> Loading checkpoint '{}'".format(self.cfg.resume))
-            checkpoint = torch.load(self.cfg.resume)
+            device_type = 'gpu' if torch.cuda.is_available() else 'cpu'
+            checkpoint = torch.load(self.cfg.resume, map_location=torch.device(device_type))
             self.load_state_dict(checkpoint['state_dict'])
             print("=> Loaded checkpoint '{}'"
                   .format(self.cfg.resume))

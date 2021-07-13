@@ -87,13 +87,14 @@ def dataset_info(dataset_name, is_linux=True):
         config = {
             'BSDS': {'img_height': 512,  # 321
                      'img_width': 512,  # 481
+                     'train_list': 'train_pair.txt',
                      'test_list': 'test_pair.lst',
-                     'data_dir': '../../dataset/BSDS',  # mean_rgb
+                     'data_dir': 'C:/Users/xavysp/dataset/BSDS',  # mean_rgb
                      'yita': 0.5},
             'BSDS300': {'img_height': 512,  # 321
                         'img_width': 512,  # 481
                         'test_list': 'test_pair.lst',
-                        'data_dir': '../../dataset/BSDS300',  # NIR
+                        'data_dir': 'C:/Users/xavysp/dataset/BSDS300',  # NIR
                         'yita': 0.5},
             'PASCAL': {'img_height': 375,
                        'img_width': 500,
@@ -103,7 +104,7 @@ def dataset_info(dataset_name, is_linux=True):
             'CID': {'img_height': 512,
                     'img_width': 512,
                     'test_list': 'test_pair.lst',
-                    'data_dir': '../../dataset/CID',  # mean_rgb
+                    'data_dir': 'C:/Users/xavysp/dataset/CID',  # mean_rgb
                     'yita': 0.3},
             'NYUD': {'img_height': 425,
                      'img_width': 560,
@@ -119,7 +120,7 @@ def dataset_info(dataset_name, is_linux=True):
                       'img_width': 1280,  # 1280
                       'test_list': 'test_pair.txt',
                       'train_list': 'train_pair.txt',
-                      'data_dir': '../../dataset/BIPED',  # WIN: '../.../dataset/BIPED/edges'
+                      'data_dir': 'C:/Users/xavysp/dataset/BIPED',  # WIN: '../.../dataset/BIPED/edges'
                       'yita': 0.5},
             'CLASSIC': {'img_height': 512,
                         'img_width': 512,
@@ -309,7 +310,7 @@ class Data_test(data.Dataset):
 		img -= self.mean_bgr
 
 		if gt is None:
-			img = cv2.resize(img,dsize=(1504,1504)) # just for Robert dataset 1504
+			# img = cv2.resize(img,dsize=(1504,1504)) # just for Robert dataset 1504
 			gt = np.zeros((img.shape[:2]))
 			gt = torch.from_numpy(np.array([gt])).float()
 		img = img.transpose((2, 0, 1))
